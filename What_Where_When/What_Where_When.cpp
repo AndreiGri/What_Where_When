@@ -4,6 +4,23 @@
 #include <vector>
 using namespace std;
 
+int search_question(int s, vector<int>& vec)
+{
+	while (vec.size())
+	{
+		s = s % vec.size();
+		for (int i = 0; i < vec.size(); i++)
+		{
+			if (vec[i] == s)
+			{
+				vec.erase(find(vec.begin(), vec.end(), s));
+				return s;
+			}
+		}
+		s++;
+	}
+}
+
 void searchKakuelsh(string text, int d, vector<int>& vec)
 {
 	char ch;
@@ -54,6 +71,7 @@ int main()
 {
 	system("chcp 1251>nul");                                                                                    // Изменение кодировки кансоли
 	system("color 80");                                                                                         // Изменяем цвет консоли и текста
+	vector<int> vec = { 1, 2, 3, 4, 5 };
 	string text1 = "Answer.txt";
 	string text2 = "Question.txt";
 	int ask = 0;
@@ -74,6 +92,7 @@ int main()
 	cout << endl;
 	cout << " Введите номер вопроса: ";
 	cin >> ask;
+	ask = search_question(ask, vec);
 	string a = reedOut(text1, ask - 1, answ);
 	cout << a;
 	cout << reedOut(text2, ask - 1, ques);
