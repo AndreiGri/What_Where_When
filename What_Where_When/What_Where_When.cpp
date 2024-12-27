@@ -4,81 +4,91 @@
 #include <vector>
 using namespace std;
 
-int a = 0;
-int b = 0;
-
-void searchKakuelsh(vector<int>& vec, string text)
+void searchKakuelsh(string text, int d, vector<int>& vec)
 {
-    char ch;
-    int k = 0;
-    
-
-    ifstream search;
-    search.open(text, ios::binary);
-
-    while (search)
-    {
-        search.get(ch);
-        if (search)
-        {
-            if (ch == '\n')
-            {
-                vec.push_back(search.tellg());
-            }
-        }
-    }
-    search.close();
+	char ch;
+	int c = 0;
+	ifstream search;
+	search.open(text, ios::binary);
+	while (!search.eof())
+	{
+		search.get(ch);
+		if ((c % d) == 0 && ch == '\n')
+		{
+			vec.push_back(search.tellg());
+			++c;
+		}
+		else
+		{
+			if (ch == '\n')
+			{
+				++c;
+			}
+		}
+	}
+	search.close();
 }
 
-string reedOut(int a, int b, string text, vector<int> vec)
+string reedOut(string text, int c, vector<int> vec)
 {
-    int c = vec[a];
-    int d = vec[b];
-    char ch;
-    char buf[200];
-    ifstream questionAnswer;
-    questionAnswer.open(text, ios::binary);
-    questionAnswer.seekg(c);
-    questionAnswer.read(buf, sizeof buf);
-    questionAnswer.close();
-    buf[d] = 0;
-    string str(buf);
-    return str;
+	char buf[200];
+	ifstream questionAnswer;
+	questionAnswer.open(text, ios::binary);
+	questionAnswer.seekg(vec[c]);
+	questionAnswer.read(buf, sizeof(buf));
+	buf[vec[c + 1] - vec[c]] = 0;
+	questionAnswer.close();
+	string str(buf);
+	return str;
 }
 
 string answIn()
 {
-    string text;
-    cout << " Введите ответ: ";
-    cin >> text;
-    return text;
+	string text;
+	cout << " Скопируйте и вставьте ответ: ";
+	cin >> text;
+	return text + '\r' + '\n';
 }
 
 int main()
 {
-    
-    system("chcp 1251>nul");                                                                                    // Изменение кодировки кансоли
-    system("color 80");                                                                                         // Изменяем цвет консоли и текста
-    vector<int>answ(2);
-    vector<int>quest(4);
-    searchKakuelsh(answ, "Answers.txt");
-    searchKakuelsh(quest, "Questions.txt");
-    int n = 0;
-    
-    string reedOut(a, b, "Questions.txt", quest);
-    string reedOut(a, b, "Answers.txt", answ);
-
-    bool result{  };
-    if (result)
-    {
-        cout << " Ответ верный!" << endl;
-    }
-    else
-    {
-        cout << " Ответ не верный!!!" << endl;
-    }
-    
-    // Задержка консоли окна
-    system("pause>nul");
-    return 0;
+	system("chcp 1251>nul");                                                                                    // Изменение кодировки кансоли
+	system("color 80");                                                                                         // Изменяем цвет консоли и текста
+	string text1 = "Answer.txt";
+	string text2 = "Question.txt";
+	int ask = 0;
+	vector<int>answ;
+	vector<int>ques;
+	searchKakuelsh(text1, 1, answ);
+	searchKakuelsh(text2, 4, ques);
+	
+	for (int i = 0; i < answ.size(); i++)
+	{
+		cout << answ[i] << ' ';
+	}
+	cout << endl;
+	for (int i = 0; i < ques.size(); i++)
+	{
+		cout << ques[i] << ' ';
+	}
+	cout << endl;
+	cout << " Введите номер вопроса: ";
+	cin >> ask;
+	string a = reedOut(text1, ask - 1, answ);
+	cout << a;
+	cout << reedOut(text2, ask - 1, ques);
+	
+	string b = answIn();
+	
+	if (a.compare(b) == 0)
+	{
+		cout << " Верно! " << endl;
+	}
+	else
+	{
+		cout << " Не верно! " << endl;
+	}
+	// Задержка консоли окна
+	system("pause>nul");
+	return 0;
 }
