@@ -4,24 +4,23 @@
 #include <vector>
 using namespace std;
 
-int search_question(int s, vector<int>& vec)
+void searchQuestion(int& s, vector<bool>& vec)
 {
-	while (vec.size())
+	s = (s % vec.size());
+	while (vec[s] == false)
 	{
-		s = s % vec.size();
-		for (int i = 0; i < vec.size(); i++)
-		{
-			if (vec[i] == s)
-			{
-				vec.erase(find(vec.begin(), vec.end(), s));
-				return s;
-			}
-		}
 		s++;
+		s = (s % vec.size());
 	}
+	vec[s] = false;
 }
 
-void searchKakuelsh(string text, int d, vector<int>& vec)
+void scrolling(int& a, vector<bool>vec)
+{
+	a = (a % vec.size());
+}
+
+void searchKakuelsh(string text, vector<int>& vec, int d = 1)
 {
 	char ch;
 	int c = 0;
@@ -30,14 +29,14 @@ void searchKakuelsh(string text, int d, vector<int>& vec)
 	while (!search.eof())
 	{
 		search.get(ch);
-		if ((c % d) == 0 && ch == '\n')
+		if ((c % d) == 0 && ch == 0xA)
 		{
 			vec.push_back(search.tellg());
 			++c;
 		}
 		else
 		{
-			if (ch == '\n')
+			if (ch == 0xA)
 			{
 				++c;
 			}
@@ -53,7 +52,7 @@ string reedOut(string text, int c, vector<int> vec)
 	questionAnswer.open(text, ios::binary);
 	questionAnswer.seekg(vec[c]);
 	questionAnswer.read(buf, sizeof(buf));
-	buf[vec[c + 1] - vec[c]] = 0;
+	buf[vec[c + 1] - vec[c] - 2] = 0;
 	questionAnswer.close();
 	string str(buf);
 	return str;
@@ -62,52 +61,58 @@ string reedOut(string text, int c, vector<int> vec)
 string answIn()
 {
 	string text;
-	cout << " Скопируйте и вставьте ответ: ";
+	cout << " Скопируйте и вставьте верный ответ: ";
 	cin >> text;
-	return text + '\r' + '\n';
+	return text;
 }
 
 int main()
 {
-	system("chcp 1251>nul");                                                                                    // Изменение кодировки кансоли
-	system("color 80");                                                                                         // Изменяем цвет консоли и текста
-	vector<int> vec = { 1, 2, 3, 4, 5 };
+	system("chcp 1251>nul");                                                                // Изменение кодировки кансоли
+	system("color 80");                                                                     // Изменяем цвет консоли и текста
+	int r = 0;                                                                              // Переменная для записи кол-ва правильных ответов
+	int w = 0;                                                                              // Переменная для записи кол-ва неверных ответов
+	int count = 0;                                                                          // Переменная для записи текущего значения
+	int as = 0;
+	vector<bool>veccount = { true,true,true,true,true };
+	int c = veccount.size();
 	string text1 = "Answer.txt";
 	string text2 = "Question.txt";
-	int ask = 0;
-	vector<int>answ;
-	vector<int>ques;
-	searchKakuelsh(text1, 1, answ);
-	searchKakuelsh(text2, 4, ques);
+	int ask = 0;                                                                         // Переменная записи значения смещения
+	int e = 0;                                                                           // Переменная хранения последнего сектора 
+	vector<int>answ;                                                                     // Вектор для записи контрольных точек в ответах
+	vector<int>ques;                                                                     // Вектор для записи контрольных точек в вопросах
+	searchKakuelsh(text1, answ);                                                         // Вызов метода для записи контрольных точек ответов
+	searchKakuelsh(text2, ques, 4);                                                      // Вызов метода для записи контрольных точек вопросов
 	
-	for (int i = 0; i < answ.size(); i++)
+	while (c)
 	{
-		cout << answ[i] << ' ';
+		cout << " Введите офсет (смещение) относительно текущего сектора на барабане: ";
+		cin >> ask;
+		scrolling(ask, veccount);
+		ask += e;
+		searchQuestion(ask, veccount);
+		e = ask;
+		string a = reedOut(text1, ask, answ);
+		cout << reedOut(text2, ask, ques) << endl;
+		string b = answIn();
+		if (a.compare(b) == 0)
+		{
+			cout << " Верно! " << endl << endl;
+			r++;
+		}
+		else
+		{
+			cout << " Не верно! Правильный ответ: " << a << endl << endl;
+			w++;
+		}
+		c--;
 	}
-	cout << endl;
-	for (int i = 0; i < ques.size(); i++)
-	{
-		cout << ques[i] << ' ';
-	}
-	cout << endl;
-	cout << " Введите номер вопроса: ";
-	cin >> ask;
-	ask = search_question(ask, vec);
-	string a = reedOut(text1, ask - 1, answ);
-	cout << a;
-	cout << reedOut(text2, ask - 1, ques);
+
+	cout << " Верных ответов: " << r << endl;
+	cout << " Неверных ответов: " << w << endl;
+
 	
-	string b = answIn();
-	
-	if (a.compare(b) == 0)
-	{
-		cout << " Верно! " << endl;
-	}
-	else
-	{
-		cout << " Не верно! " << endl;
-	}
-	// Задержка консоли окна
-	system("pause>nul");
+	system("pause>nul");                                                                 // Задержка консоли окна
 	return 0;
 }
