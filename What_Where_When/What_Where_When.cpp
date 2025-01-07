@@ -89,7 +89,9 @@ int main()
 			return 1;                                                                   // программа заканчивается возвращая ошибку 1
 		}
 	}
-
+	
+	
+	
 	int ask = 0;                                                                        // Переменная записи значения смещения
 	int lastNumber = 0;                                                                 // Переменная хранения последнего сектора 
 	vector<int>answ;                                                                    // Вектор для записи контрольных точек в ответах
@@ -110,13 +112,15 @@ int main()
 		cout << reedOut(text2, lastNumber, ques) << endl;                               // Выводим вопрос
 		if (reedOut(text1, lastNumber, answ).compare(answIn()) == 0)                    // Сравниваем ответ из метода reedOut() и метода answIn()
 		{
+			cout << '\a';
 			cout << " Верно! " << endl << endl;                                         // Выводим если ответы одинаковы
 			r++;                                                                        // Инкркментируем переменную right
 		}
 		else                                                                            // Иначе выводим второй ответ
 		{
-			cout << " Не верно! Правильный ответ: " << reedOut(text1, lastNumber, answ) // Выводим если ответы не одинаковы
-				<< endl << endl;
+			cout << '\a';
+			cout << " Не верно! Правильный ответ: " 
+				<< reedOut(text1, lastNumber, answ) << endl << endl;
 			w++;                                                                        // Инкркментируем переменную wrong
 		}
 		count--;                                                                        // Декрементируем счётчик итераций
